@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\Task;
+namespace App\Filament\Resources\Role;
 
-use App\Filament\Resources\Task\TaskGroupResource\Pages;
-use App\Filament\Resources\Task\TaskGroupResource\RelationManagers;
-use App\Models\Task\TaskGroup;
+use App\Filament\Resources\Role\RoleResource\Pages;
+use App\Filament\Resources\Role\RoleResource\RelationManagers;
+use App\Models\Role\Role;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,11 +13,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class TaskGroupResource extends Resource
+class RoleResource extends Resource
 {
-    protected static ?string $model = TaskGroup::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-hashtag';
+    protected static ?string $model = Role::class;
+    protected static ?string $navigationIcon = 'heroicon-o-square-3-stack-3d';
+    protected static ?string $navigationGroup = 'Configurações';
+    protected static ?string $modelLabel = 'Perfil';
+    protected static ?string $pluralModelLabel = 'Perfis';
+    protected static ?string $slug = 'perfil';
 
     public static function getNavigationBadge(): string
     {
@@ -28,10 +31,16 @@ class TaskGroupResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('title')
-                    ->required(),
-                Forms\Components\TextInput::make('description')
-                    ->nullable()
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->label('Perfil'),
+
+                Forms\Components\Select::make('permissions')
+                    ->label('Permissões')
+                    ->multiple()
+                    ->preload()
+                    ->relationship('permissions', 'name')
             ]);
     }
 
@@ -39,25 +48,11 @@ class TaskGroupResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')
-                    ->searchable()
-                    ->label('Título')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('description')
-                    ->label('Descrição')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->sortable(),
-
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Perfil')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Criado em')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('Atualizado em')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -79,7 +74,12 @@ class TaskGroupResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageTaskGroups::route('/'),
+            'index' => Pages\ManageRoles::route('/'),
         ];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }

@@ -12,28 +12,54 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $modelLabel = 'Usuário';
+    protected static ?string $slug = 'usuario';
+
     public static function getNavigationBadge(): string
     {
         return static::getModel()::where('is_admin', true)->count();
     }
-    protected static ?string $navigationGroup = 'Administração';
+    protected static ?string $navigationGroup = 'Configurações';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nome')
                     ->required(),
+
                 Forms\Components\TextInput::make('email')
+                    ->label('E-mail')
+                    ->unique(ignoreRecord: true)
                     ->email()
                     ->required(),
+
+                Forms\Components\TextInput::make('password')
+                    ->label('Senha')
+                    ->password()
+                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                    ->dehydrated(fn ($state): string => filled($state))
+                    ->required(fn (string $context): bool => $context === 'create'),
+
                 Forms\Components\Toggle::make('is_admin')
                     ->required(),
+
+                Forms\Components\Select::make('roles')
+                    ->multiple()
+                    ->preload()
+                    ->relationship(
+                        'roles',
+                        'name',
+                        fn (Builder $query) => auth()->user()->hasRole('Admin') ?
+                            null : $query->where('name', '!=', 'Admin'
+                        ))
             ]);
     }
 
@@ -85,5 +111,20 @@ class UserResource extends Resource
         return [
             'index' => Pages\ManageUsers::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return auth()->user()->hasRole('Admin') ?
+            parent::getEloquentQuery() :
+            parent::getEloquentQuery()->whereHas(
+                'roles',
+                fn ($query) => $query->where('name', '!=', 'Admin')
+            );
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }

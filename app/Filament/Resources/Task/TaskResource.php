@@ -24,7 +24,6 @@ class TaskResource extends Resource
     {
         return static::getModel()::count();
     }
-    protected static ?string $navigationGroup = 'Principal';
 
     public static function form(Form $form): Form
     {
@@ -36,10 +35,12 @@ class TaskResource extends Resource
                     Forms\Components\Select::make('user_id')
                         ->relationship('user', 'name')
                         ->searchable()
+                        ->preload()
                         ->required(),
 
                     Forms\Components\Select::make('task_group_id')
                         ->relationship('taskGroup', 'title')
+                        ->preload()
                         ->required(),
 
                     Forms\Components\TextInput::make('title')
@@ -90,6 +91,7 @@ class TaskResource extends Resource
 
                 SelectFilter::make('taskGroup')
                     ->searchable()
+                    ->preload()
                     ->relationship('taskGroup', 'title')
                     ->multiple()
                     ->label('Grupo da Tarefa'),
