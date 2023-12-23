@@ -28,10 +28,14 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->registration()
+            ->passwordReset()
             ->profile(EditProfile::class)
             ->colors([
+//                'primary' => '#0d659d',
                 'primary' => Color::Amber,
             ])
+//            ->viteTheme('resources/css/filament/admin/theme.css')
             ->sidebarFullyCollapsibleOnDesktop()
             ->collapsedSidebarWidth('3xl')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
