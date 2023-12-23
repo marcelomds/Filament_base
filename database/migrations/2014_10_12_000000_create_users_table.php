@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->boolean('is_admin')->default(0);
+            $table->foreignId('address_id')->nullable()->constrained('addresses');
             $table->rememberToken();
             $table->timestamps();
         });

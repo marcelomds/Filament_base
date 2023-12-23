@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Task;
 use App\Filament\Resources\Task\TaskGroupResource\Pages;
 use App\Filament\Resources\Task\TaskGroupResource\RelationManagers;
 use App\Models\Task\TaskGroup;
+use App\Services\Task\TaskGroupService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -15,6 +16,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TaskGroupResource extends Resource
 {
+    private TaskGroupService $taskGroupService;
+    public function __construct(TaskGroupService $taskGroupService)
+    {
+        $this->taskGroupService = $taskGroupService;
+    }
+
     protected static ?string $model = TaskGroup::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-hashtag';
